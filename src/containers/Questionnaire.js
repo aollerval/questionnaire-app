@@ -4,12 +4,12 @@ import Question from '../components/Question';
 export default function Questionnaire() {
     const [qs, setQuestions] = useState([]);
     const [qc, setQuestionnaireCode] = useState("");
-    const [qa, setQuestionnaiteAnswers] = useState([])
+    // const [qa, setQuestionnaireAnswers] = useState([]);
     const questionnaireRef = useRef()
 
     const LOCAL_STORAGE_KEY_Q = "questions"
     const LOCAL_STORAGE_KEY_QC = "questionnaireCode"
-    const LOCAL_STORAGE_KEY_AN = "answers"
+    const LOCAL_STORAGE_KEY_AN = "questionAnswers"
 
     useEffect(() => {
         const storedQuestions = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_Q))
@@ -18,10 +18,20 @@ export default function Questionnaire() {
         const storedQuestionnaireCode = localStorage.getItem(LOCAL_STORAGE_KEY_QC)
         if(storedQuestionnaireCode) setQuestionnaireCode(storedQuestionnaireCode)
     },[], "")
+
+    // useEffect(() => {
+    //     const storedQuestionnaireAnswers = localStorage.getItem(LOCAL_STORAGE_KEY_AN)
+    //     if(storedQuestionnaireAnswers) setQuestionnaireAnswers(storedQuestionnaireAnswers)
+    // }, [])
+
+    // useEffect(() => {
+    //     localStorage.setItem(LOCAL_STORAGE_KEY_AN, JSON.stringify(qa))
+    // }, [qa])
     
     useEffect(() => {
         localStorage.setItem(LOCAL_STORAGE_KEY_Q, JSON.stringify(qs))
         localStorage.setItem(LOCAL_STORAGE_KEY_QC, qc)
+       
     },[qs], qc)
 
     function fetchQuestionnaire(){
@@ -49,8 +59,22 @@ export default function Questionnaire() {
                 return questionnaire.questionnaireCode
             })
         })
-
         questionnaireRef.current.value = null
+    }
+
+    var qa = {
+        questionnaireCode : {qc},
+        questions : [],
+        answers : []
+    }
+
+    function handleAddAnswers(id){
+        qa.answers.push(id)
+        return qa
+    }
+
+    function handleEliminateAnswers(){
+        
     }
   
     return (
@@ -60,18 +84,18 @@ export default function Questionnaire() {
         <div className='questionnaireFetcher'>
             <input type="text" ref={questionnaireRef}/> 
             <input type="submit" onClick={fetchQuestionnaire}/> 
-            {console.log(qs)}
         </div>
 
         <div className={qc}>
             <ul>
                 {
                     qs.map(question => {
-                        return <Question key = {question.id} question = {question}/>
+                        return <Question key = {question.id} question = {question} handleAddAnswers = {handleAddAnswers}/>
                     })
                 }
             </ul>
         </div>
+        <input type="submit" />
     </div>
   )
 }
