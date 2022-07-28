@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Question from '../components/Question';
+import {v4 as uuid} from 'uuid'
 
 export default function Questionnaire() {
     const [qs, setQuestions] = useState([]);
@@ -18,15 +19,6 @@ export default function Questionnaire() {
         const storedQuestionnaireCode = localStorage.getItem(LOCAL_STORAGE_KEY_QC)
         if(storedQuestionnaireCode) setQuestionnaireCode(storedQuestionnaireCode)
     },[], "")
-
-    // useEffect(() => {
-    //     const storedQuestionnaireAnswers = localStorage.getItem(LOCAL_STORAGE_KEY_AN)
-    //     if(storedQuestionnaireAnswers) setQuestionnaireAnswers(storedQuestionnaireAnswers)
-    // }, [])
-
-    // useEffect(() => {
-    //     localStorage.setItem(LOCAL_STORAGE_KEY_AN, JSON.stringify(qa))
-    // }, [qa])
     
     useEffect(() => {
         localStorage.setItem(LOCAL_STORAGE_KEY_Q, JSON.stringify(qs))
@@ -34,6 +26,7 @@ export default function Questionnaire() {
        
     },[qs], qc)
 
+    //Get questionnaire from backend
     function fetchQuestionnaire(){
         const questionnaireCode = questionnaireRef.current.value
         const url = `http://localhost:8080/api/v1/questionnaire/${questionnaireCode}`
@@ -62,19 +55,55 @@ export default function Questionnaire() {
         questionnaireRef.current.value = null
     }
 
+    function sendQuestionnaireResults(){
+        const url = `http://localhost:8080/api/v1/result/`
+        fetch(url , {
+            method : 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type' : 'application/json',
+                'accept' : '*/*'
+            },
+            body:JSON.stringify({
+                'resultCode' : uuid(),
+                'questionnaireCode' : qc,
+                'questionCodes' : qa.questions,
+                'answers' : qa.answers
+            })
+        })
+
+        console.log(JSON.stringify({
+            'resultCode' : uuid(),
+            'questionnaireCode' : qc,
+            'questionCodes' : qa.questions,
+            'answers' : qa.answers
+        }))
+    }
+
     var qa = {
-        questionnaireCode : {qc},
+        questionnaireCode : qc,
         questions : [],
         answers : []
     }
 
-    function handleAddAnswers(id){
-        qa.answers.push(id)
+    function handleAddAnswers(a_id, q_id){
+        qa.answers.push(a_id)
+        qa.questions.push(q_id)
         return qa
     }
 
-    function handleEliminateAnswers(){
+    function handleEliminateAnswers(a_id, q_id){
+        var filteredAnswers = qa.answers.filter(function(value){
+            return value != a_id
+        })
         
+        
+        var filteredQuestions = qa.questions.filter(function(value){
+            return value != q_id //Tengo que agregar que solo se pueda responder 1 con uno de los checkboxes
+        })
+
+        qa.answers = filteredAnswers
+        qa.questions = filteredQuestions
     }
   
     return (
@@ -90,12 +119,12 @@ export default function Questionnaire() {
             <ul>
                 {
                     qs.map(question => {
-                        return <Question key = {question.id} question = {question} handleAddAnswers = {handleAddAnswers}/>
+                        return <Question key = {question.id} question = {question} handleAddAnswers = {handleAddAnswers} handleEliminateAnswer = {handleEliminateAnswers}/>
                     })
                 }
             </ul>
         </div>
-        <input type="submit" />
+        <input type="submit" onClick={sendQuestionnaireResults}/>
     </div>
   )
 }

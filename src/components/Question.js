@@ -1,10 +1,12 @@
 import React from 'react'
 
-export default function ({question, handleAddAnswers}) {
+export default function ({question, handleAddAnswers, handleEliminateAnswer}) {
 
   const handleChecked = (e) => {
     if(e.target.checked){
-      handleAddAnswers(e.target.value)
+      handleAddAnswers(e.target.value, question.id)
+    }else{
+      handleEliminateAnswer(e.target.value, question.id)
     }
     
   }
