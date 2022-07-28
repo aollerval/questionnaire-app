@@ -5,7 +5,6 @@ import {v4 as uuid} from 'uuid'
 export default function Questionnaire() {
     const [qs, setQuestions] = useState([]);
     const [qc, setQuestionnaireCode] = useState("");
-    // const [qa, setQuestionnaireAnswers] = useState([]);
     const questionnaireRef = useRef()
 
     const LOCAL_STORAGE_KEY_Q = "questions"
@@ -24,7 +23,7 @@ export default function Questionnaire() {
         localStorage.setItem(LOCAL_STORAGE_KEY_Q, JSON.stringify(qs))
         localStorage.setItem(LOCAL_STORAGE_KEY_QC, qc)
        
-    },[qs], qc)
+    },[qs, qc])
 
     //Get questionnaire from backend
     function fetchQuestionnaire(){
@@ -55,6 +54,7 @@ export default function Questionnaire() {
         questionnaireRef.current.value = null
     }
 
+    //Send selected answers to backend for storage
     function sendQuestionnaireResults(){
         const url = `http://localhost:8080/api/v1/result/`
         fetch(url , {
@@ -72,12 +72,7 @@ export default function Questionnaire() {
             })
         })
 
-        console.log(JSON.stringify({
-            'resultCode' : uuid(),
-            'questionnaireCode' : qc,
-            'questionCodes' : qa.questions,
-            'answers' : qa.answers
-        }))
+        //Vaciar local storage, eliminar qa, qc y qs.  Resetear el estado
     }
 
     var qa = {
@@ -94,12 +89,12 @@ export default function Questionnaire() {
 
     function handleEliminateAnswers(a_id, q_id){
         var filteredAnswers = qa.answers.filter(function(value){
-            return value != a_id
+            return value !== a_id
         })
         
         
         var filteredQuestions = qa.questions.filter(function(value){
-            return value != q_id //Tengo que agregar que solo se pueda responder 1 con uno de los checkboxes
+            return value !== q_id //Tengo que agregar que solo se pueda responder 1 con uno de los checkboxes
         })
 
         qa.answers = filteredAnswers
