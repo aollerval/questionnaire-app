@@ -75,6 +75,7 @@ export default function Questionnaire() {
         //Vaciar local storage, eliminar qa, qc y qs.  Resetear el estado
     }
 
+    //Estado de la respuesta para enviar resultados del cuestionario
     var qa = {
         questionnaireCode : qc,
         questions : [],
@@ -91,7 +92,6 @@ export default function Questionnaire() {
         var filteredAnswers = qa.answers.filter(function(value){
             return value !== a_id
         })
-        
         
         var filteredQuestions = qa.questions.filter(function(value){
             return value !== q_id //Tengo que agregar que solo se pueda responder 1 con uno de los checkboxes
